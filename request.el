@@ -229,10 +229,12 @@ as URL which is the requested URL.")
 (defvar request--backend-alist
   '((url-retrieve
      . ((request             . request--url-retrieve)
+        (request-sync        . request--url-retrieve-sync)
         (kill-process-buffer . kill-buffer)
         (get-cookies         . request--url-retrieve-get-cookies)))
     (curl
      . ((request             . request--curl)
+        (request-sync        . request--curl-sync)
         (kill-process-buffer . request--curl-kill-process-buffer)
         (get-cookies         . request--curl-get-cookies))))
   "Available request backends.")
@@ -287,6 +289,7 @@ Example::
                      (complete nil)
                      (timeout request-timeout)
                      (status-code nil)
+                     (sync nil)
                      (response (make-request-response)))
   "Send request to URL.
 
@@ -422,8 +425,11 @@ and requests.request_ (Python).
   (setf (request-response-settings response) settings)
   (setf (request-response-url      response) url)
   (setf (request-response--backend response) request-backend)
-  ;; Call `request--url-retrieve' or `request--curl'.
-  (apply (request--choose-backend 'request) url settings)
+  ;; Call `request--url-retrieve'(`-sync') or `request--curl'(`-sync').
+  (apply (if sync
+             (request--choose-backend 'request-sync)
+           (request--choose-backend 'request))
+         url settings)
   response)
 
 (defun request--parse-data (buffer parser error-thrown backend)
@@ -605,6 +611,11 @@ associated process is exited."
   (setf (request-response-error-thrown response) (plist-get status :error))
 
   (apply #'request--callback (current-buffer) settings))
+
+(defun* request--url-retrieve-sync (url &rest settings
+                                        &key type data files headers timeout
+                                        response &allow-other-keys)
+  (error "Not implemented!")) ; FIXME: implement `request--url-retrieve-sync'
 
 (defun request--url-retrieve-get-cookies (host localpart secure)
   (mapcar
@@ -857,6 +868,11 @@ START-URL is the URL requested."
 
 (defun request--curl-kill-process-buffer (buffer)
   (interrupt-process (get-buffer-process buffer)))
+
+(defun* request--curl-sync (url &rest settings
+                                &key type data files headers timeout response
+                                &allow-other-keys)
+  (error "Not implemented!")) ; FIXME: implement `request--curl-sync'
 
 (defun request--curl-get-cookies (host localpart secure)
   (request--netscape-get-cookies (request--curl-cookie-jar)
