@@ -224,22 +224,6 @@ See also:
     (should (equal (request-testing-sort-alist (assoc-default 'json data))
                    '((a . 1) (b . 2) (c . 3))))))
 
-;; (request-deftest request-post-json ()
-;;   (request-testing-with-response-slots
-;;       (request-testing-sync "report/some-path"
-;;                             :type "POST"
-;;                             :data "{\"a\": 1, \"b\": 2, \"c\": 3}"
-;;                             :headers '(("Content-Type" . "application/json"))
-;;                             :parser 'json-read)
-;;     (should (equal status-code 200))
-;;     (should-not error-thrown)
-;;     (message "%S" (request-testing-sort-alist (assoc-default 'json data)))
-;;     (message "%S" (assoc-default "form"   data))
-;;     (should (equal (assoc-default "path"   data) "some-path"))
-;;     (should (equal (assoc-default "method" data) "POST"))
-;;     (should (equal (request-testing-sort-alist (assoc-default 'json data))
-;;                    '((a . 1) (b . 2) (c . 3))))))
-
 (request-deftest request-post-files/simple-buffer ()
   :backends (curl)
   (with-current-buffer (get-buffer-create " *request-test-temp*")
