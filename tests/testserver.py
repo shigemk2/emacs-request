@@ -5,6 +5,7 @@ from flask import (
 from werkzeug.http import HTTP_STATUS_CODES
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 app.secret_key = 'SECRET-KEY-FOR-EMACS-REQUEST-DEVELOPMENT'
 
 all_methods = ['GET', 'POST', 'PUT', 'DELETE']
@@ -21,7 +22,7 @@ def page_report(path):
     # see: http://flask.pocoo.org/docs/api/#incoming-request-data
     return jsonify(dict(
         path=path,
-        data=request.data,
+        data=request.data.decode('utf-8'),
         form=request.form,
         files=[dict(name=k, filename=f.filename, data=f.read())
                for (k, f) in request.files.items()],
